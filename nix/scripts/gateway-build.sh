@@ -35,21 +35,29 @@ bash -e -c ". \"$STDENV_SETUP\"; patchShebangs node_modules/.bin"
 pnpm build
 pnpm ui:build
 
-# Deploy matrix extension with dependencies before pruning
-# pnpm deploy bundles workspace package with all prod deps for standalone use
+# Copy matrix extension dependencies before pruning removes them
+# The matrix extension is a workspace package but not a root prod dependency,
+# so pnpm prune --prod will remove its dependencies
 if [ -d extensions/matrix ]; then
-  echo "Deploying matrix extension with dependencies..."
-  mkdir -p .matrix-deploy
-  pnpm --filter @moltbot/matrix deploy --prod --legacy .matrix-deploy
+  echo "Preserving matrix extension dependencies..."
+  mkdir -p .matrix-deps
+  # Copy the matrix extension's dependencies from the pnpm virtual store
+  for dep in "@vector-im/matrix-bot-sdk" "@matrix-org/matrix-sdk-crypto-nodejs" "markdown-it" "music-metadata" "zod"; do
+    dep_dir="node_modules/$dep"
+    if [ -d "$dep_dir" ] || [ -L "$dep_dir" ]; then
+      # Resolve symlink and copy actual files
+      cp -rL "$dep_dir" ".matrix-deps/" 2>/dev/null || true
+    fi
+  done
 fi
 
 CI=true pnpm prune --prod
 rm -rf node_modules/.pnpm/node_modules
 
-# Restore matrix extension node_modules from deploy
-if [ -d .matrix-deploy/node_modules ]; then
+# Restore matrix extension dependencies after prune
+if [ -d .matrix-deps ] && [ -d extensions/matrix ]; then
   echo "Restoring matrix extension dependencies..."
-  rm -rf extensions/matrix/node_modules
-  mv .matrix-deploy/node_modules extensions/matrix/
-  rm -rf .matrix-deploy
+  mkdir -p extensions/matrix/node_modules
+  cp -r .matrix-deps/* extensions/matrix/node_modules/ 2>/dev/null || true
+  rm -rf .matrix-deps
 fi

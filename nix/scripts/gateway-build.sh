@@ -40,3 +40,15 @@ pnpm ui:build
 # which would be removed by pruning since it's not a direct root dependency.
 # Trade-off: ~50MB larger package but fully working matrix channel support.
 rm -rf node_modules/.pnpm/node_modules
+
+# Copy matrix crypto native binary if available
+# The @matrix-org/matrix-sdk-crypto-nodejs package downloads this via postinstall,
+# which is skipped in nix build, so we pre-fetch and copy it manually
+if [ -n "${MATRIX_CRYPTO_LIB_SRC:-}" ] && [ -n "${MATRIX_CRYPTO_LIB_NAME:-}" ]; then
+  crypto_dir="node_modules/.pnpm/@matrix-org+matrix-sdk-crypto-nodejs@0.4.0/node_modules/@matrix-org/matrix-sdk-crypto-nodejs"
+  if [ -d "$crypto_dir" ]; then
+    echo "Installing matrix crypto native binary: $MATRIX_CRYPTO_LIB_NAME"
+    cp "$MATRIX_CRYPTO_LIB_SRC" "$crypto_dir/$MATRIX_CRYPTO_LIB_NAME"
+    chmod 755 "$crypto_dir/$MATRIX_CRYPTO_LIB_NAME"
+  fi
+fi

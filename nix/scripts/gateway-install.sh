@@ -4,6 +4,11 @@ mkdir -p "$out/lib/moltbot" "$out/bin"
 
 cp -r dist node_modules package.json ui "$out/lib/moltbot/"
 
+# Include extensions for plugin installation (matrix, memory-core, etc.)
+if [ -d extensions ]; then
+  cp -r extensions "$out/lib/moltbot/"
+fi
+
 if [ -z "${STDENV_SETUP:-}" ]; then
   echo "STDENV_SETUP is not set" >&2
   exit 1

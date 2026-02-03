@@ -6426,6 +6426,10 @@ in
         type = t.nullOr (t.bool);
         default = null;
       };
+      root = lib.mkOption {
+        type = t.nullOr (t.str);
+        default = null;
+      };
     }; });
       default = null;
     };

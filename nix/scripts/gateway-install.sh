@@ -81,7 +81,7 @@ if [ -n "$hasown_src" ]; then
 fi
 
 # === MATRIX EXTENSION SUPPORT ===
-# Link matrix-bot-sdk and crypto to extensions/matrix/node_modules
+# Link matrix extension dependencies to node_modules
 matrix_ext="$out/lib/openclaw/extensions/matrix"
 if [ -d "$matrix_ext" ]; then
   mkdir -p "$matrix_ext/node_modules/@vector-im" "$matrix_ext/node_modules/@matrix-org"
@@ -106,6 +106,16 @@ if [ -d "$matrix_ext" ]; then
     ln -sfn "$matrix_crypto_src" "$out/lib/openclaw/node_modules/@matrix-org/matrix-sdk-crypto-nodejs"
   else
     echo "WARNING: matrix-sdk-crypto-nodejs not found in node_modules/.pnpm"
+  fi
+  
+  # Link music-metadata (for audio file handling)
+  music_metadata_src="$(find "$out/lib/openclaw/node_modules/.pnpm" -type d -name "music-metadata" | head -n 1)"
+  if [ -n "$music_metadata_src" ]; then
+    echo "Linking music-metadata from: $music_metadata_src"
+    ln -sfn "$music_metadata_src" "$matrix_ext/node_modules/music-metadata"
+    ln -sfn "$music_metadata_src" "$out/lib/openclaw/node_modules/music-metadata"
+  else
+    echo "WARNING: music-metadata not found in node_modules/.pnpm"
   fi
 fi
 # === END MATRIX EXTENSION SUPPORT ===

@@ -36,6 +36,7 @@ let
     installPhase = "${../scripts/node-addon-api-install.sh}";
   };
 
+  # === MATRIX SUPPORT (fork addition) ===
   # Matrix crypto native binary - downloaded separately since postinstall is skipped
   # This is needed because the @matrix-org/matrix-sdk-crypto-nodejs package
   # downloads its native binary via postinstall, which is skipped in nix build
@@ -49,7 +50,8 @@ let
       url = "https://github.com/matrix-org/matrix-rust-sdk-crypto-nodejs/releases/download/v0.4.0/matrix-sdk-crypto.darwin-arm64.node";
       hash = "sha256-9/X99ikki9q5NOUDj3KL+7OzYfOhSiTtGAZhCMEpry8=";
     }
-  else null; # Only darwin-arm64 supported for now
+  else null;  # Only darwin-arm64 pre-fetched; other platforms use npm postinstall
+  # === END MATRIX SUPPORT ===
 in
 
 stdenv.mkDerivation (finalAttrs: {
@@ -97,9 +99,13 @@ stdenv.mkDerivation (finalAttrs: {
     GATEWAY_PREBUILD_SH = "${../scripts/gateway-prebuild.sh}";
     PROMOTE_PNPM_INTEGRITY_SH = "${../scripts/promote-pnpm-integrity.sh}";
     REMOVE_PACKAGE_MANAGER_FIELD_SH = "${../scripts/remove-package-manager-field.sh}";
+    PATCH_CLIPBOARD_SH = "${../scripts/patch-clipboard.sh}";
+    PATCH_CLIPBOARD_WRAPPER = "${../scripts/clipboard-wrapper.cjs}";
     STDENV_SETUP = "${stdenv}/setup";
+    # === MATRIX SUPPORT ===
     MATRIX_CRYPTO_LIB_NAME = matrixCryptoLibName;
     MATRIX_CRYPTO_LIB_SRC = if matrixCryptoLibSrc != null then "${matrixCryptoLibSrc}" else "";
+    # === END MATRIX SUPPORT ===
   };
 
   postPatch = "${../scripts/gateway-postpatch.sh}";
@@ -108,20 +114,11 @@ stdenv.mkDerivation (finalAttrs: {
   dontStrip = true;
   dontPatchShebangs = true;
 
-  # Ad-hoc sign on macOS for Local Network permission (TCC)
-  postFixup = lib.optionalString stdenv.hostPlatform.isDarwin ''
-    for bin in $out/bin/*; do
-      /usr/bin/codesign -s - -f "$bin" || true
-    done
-  '';
-
   meta = with lib; {
-    description = "Telegram-first AI gateway (Moltbot)";
-    homepage = "https://github.com/moltbot/moltbot";
+    description = "Telegram-first AI gateway (Openclaw)";
+    homepage = "https://github.com/openclaw/openclaw";
     license = licenses.mit;
     platforms = platforms.darwin ++ platforms.linux;
     mainProgram = "openclaw";
   };
 })
-
-# force rebuild - codesign fix

@@ -67,7 +67,7 @@
       }
     ) // {
       overlays.default = overlay;
-      homeManagerModules.openclaw = import ./nix/modules/home-manager/openclaw.nix;
-      darwinModules.openclaw = import ./nix/modules/darwin/openclaw.nix;
+      homeManagerModules.openclaw = import ./nix/modules/home-manager/openclaw;
+      darwinModules.openclaw = import ./nix/modules/darwin/openclaw;
     };
 }

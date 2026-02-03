@@ -1,5 +1,5 @@
 {
-  description = "nix-openclaw: declarative Openclaw packaging";
+  description = "nix-moltbot: declarative Moltbot packaging";
 
   nixConfig = {
     extra-substituters = [ "https://cache.garnix.io" ];
@@ -13,13 +13,13 @@
     flake-utils.url = "github:numtide/flake-utils";
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
-    nix-steipete-tools.url = "github:openclaw/nix-steipete-tools";
+    nix-steipete-tools.url = "github:moltbot/nix-steipete-tools";
   };
 
   outputs = { self, nixpkgs, flake-utils, home-manager, nix-steipete-tools }:
     let
       overlay = import ./nix/overlay.nix;
-      sourceInfoStable = import ./nix/sources/openclaw-source.nix;
+      sourceInfoStable = import ./nix/sources/moltbot-source.nix;
       systems = [ "x86_64-linux" "aarch64-darwin" ];
     in
     flake-utils.lib.eachSystem systems (system:
@@ -39,24 +39,21 @@
       in
       {
         packages = packageSetStable // {
-          default = packageSetStable.openclaw;
+          default = packageSetStable.moltbot;
         };
 
         apps = {
-          openclaw = flake-utils.lib.mkApp { drv = packageSetStable.openclaw-gateway; };
+          moltbot = flake-utils.lib.mkApp { drv = packageSetStable.moltbot-gateway; };
         };
 
         checks = {
-          gateway = packageSetStable.openclaw-gateway;
+          gateway = packageSetStable.moltbot-gateway;
         } // (if pkgs.stdenv.hostPlatform.isLinux then {
-          gateway-tests = pkgs.callPackage ./nix/checks/openclaw-gateway-tests.nix {
+          gateway-tests = pkgs.callPackage ./nix/checks/moltbot-gateway-tests.nix {
             sourceInfo = sourceInfoStable;
           };
-          config-options = pkgs.callPackage ./nix/checks/openclaw-config-options.nix {
+          config-options = pkgs.callPackage ./nix/checks/moltbot-config-options.nix {
             sourceInfo = sourceInfoStable;
-          };
-          hm-activation = import ./nix/checks/openclaw-hm-activation.nix {
-            inherit pkgs home-manager;
           };
         } else {});
 
@@ -70,7 +67,7 @@
       }
     ) // {
       overlays.default = overlay;
-      homeManagerModules.openclaw = import ./nix/modules/home-manager/openclaw.nix;
-      darwinModules.openclaw = import ./nix/modules/darwin/openclaw.nix;
+      homeManagerModules.moltbot = import ./nix/modules/home-manager/moltbot.nix;
+      darwinModules.moltbot = import ./nix/modules/darwin/moltbot.nix;
     };
 }

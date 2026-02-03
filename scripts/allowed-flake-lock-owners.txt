@@ -1,6 +1,6 @@
 # Allowed GitHub inputs in flake.lock (owner/repo)
 NixOS/nixpkgs
-openclaw/nix-steipete-tools
+moltbot/nix-steipete-tools
 nix-community/home-manager
 nix-systems/default
 numtide/flake-utils

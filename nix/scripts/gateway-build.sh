@@ -30,8 +30,7 @@ export HOME="$(mktemp -d)"
 pnpm install --offline --frozen-lockfile --ignore-scripts --store-dir "$store_path"
 chmod -R u+w node_modules
 rm -rf node_modules/.pnpm/sharp@*/node_modules/sharp/src/build
-# node-llama-cpp postinstall attempts to download/compile llama.cpp (network blocked in Nix).
-NODE_LLAMA_CPP_SKIP_DOWNLOAD=1 pnpm rebuild
+pnpm rebuild
 bash -e -c ". \"$STDENV_SETUP\"; patchShebangs node_modules/.bin"
 pnpm build
 pnpm ui:build

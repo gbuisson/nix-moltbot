@@ -80,5 +80,30 @@ if [ -n "$hasown_src" ]; then
   fi
 fi
 
+# === MATRIX EXTENSION SUPPORT ===
+# Link matrix-bot-sdk and crypto to extensions/matrix/node_modules
+matrix_ext="$out/lib/openclaw/extensions/matrix"
+if [ -d "$matrix_ext" ]; then
+  mkdir -p "$matrix_ext/node_modules/@vector-im" "$matrix_ext/node_modules/@matrix-org"
+  
+  # Link matrix-bot-sdk
+  matrix_bot_sdk_src="$(find "$out/lib/openclaw/node_modules/.pnpm" -path "*/@vector-im/matrix-bot-sdk@*/node_modules/@vector-im/matrix-bot-sdk" -print | head -n 1)"
+  if [ -n "$matrix_bot_sdk_src" ]; then
+    ln -sfn "$matrix_bot_sdk_src" "$matrix_ext/node_modules/@vector-im/matrix-bot-sdk"
+    # Also link to top-level for require resolution
+    mkdir -p "$out/lib/openclaw/node_modules/@vector-im"
+    ln -sfn "$matrix_bot_sdk_src" "$out/lib/openclaw/node_modules/@vector-im/matrix-bot-sdk"
+  fi
+  
+  # Link matrix-sdk-crypto-nodejs
+  matrix_crypto_src="$(find "$out/lib/openclaw/node_modules/.pnpm" -path "*/@matrix-org/matrix-sdk-crypto-nodejs@*/node_modules/@matrix-org/matrix-sdk-crypto-nodejs" -print | head -n 1)"
+  if [ -n "$matrix_crypto_src" ]; then
+    ln -sfn "$matrix_crypto_src" "$matrix_ext/node_modules/@matrix-org/matrix-sdk-crypto-nodejs"
+    mkdir -p "$out/lib/openclaw/node_modules/@matrix-org"
+    ln -sfn "$matrix_crypto_src" "$out/lib/openclaw/node_modules/@matrix-org/matrix-sdk-crypto-nodejs"
+  fi
+fi
+# === END MATRIX EXTENSION SUPPORT ===
+
 bash -e -c '. "$STDENV_SETUP"; makeWrapper "$NODE_BIN" "$out/bin/openclaw" --add-flags "$out/lib/openclaw/dist/index.js" --set-default OPENCLAW_NIX_MODE "1" --set-default MOLTBOT_NIX_MODE "1" --set-default CLAWDBOT_NIX_MODE "1"'
 ln -s "$out/bin/openclaw" "$out/bin/moltbot"

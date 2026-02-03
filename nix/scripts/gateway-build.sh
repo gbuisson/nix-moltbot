@@ -30,6 +30,19 @@ export HOME="$(mktemp -d)"
 pnpm install --offline --frozen-lockfile --ignore-scripts --store-dir "$store_path"
 chmod -R u+w node_modules
 rm -rf node_modules/.pnpm/sharp@*/node_modules/sharp/src/build
+
+# === MATRIX EXTENSION SUPPORT ===
+# Copy matrix-sdk-crypto native binary if provided (needed because pnpm postinstall is skipped)
+if [ -n "${MATRIX_CRYPTO_LIB_SRC:-}" ] && [ -n "${MATRIX_CRYPTO_LIB_NAME:-}" ]; then
+  CRYPTO_DIR="node_modules/@matrix-org/matrix-sdk-crypto-nodejs"
+  if [ -d "$CRYPTO_DIR" ]; then
+    echo "Installing matrix-sdk-crypto native binary: $MATRIX_CRYPTO_LIB_NAME"
+    cp "$MATRIX_CRYPTO_LIB_SRC" "$CRYPTO_DIR/$MATRIX_CRYPTO_LIB_NAME"
+    chmod 755 "$CRYPTO_DIR/$MATRIX_CRYPTO_LIB_NAME"
+  fi
+fi
+# === END MATRIX EXTENSION SUPPORT ===
+
 # node-llama-cpp postinstall attempts to download/compile llama.cpp (network blocked in Nix).
 NODE_LLAMA_CPP_SKIP_DOWNLOAD=1 pnpm rebuild
 bash -e -c ". \"$STDENV_SETUP\"; patchShebangs node_modules/.bin"

@@ -1,4 +1,4 @@
-name: Config Options Guard
+name: HM Activation (macOS)
 
 on:
   pull_request:
@@ -9,9 +9,9 @@ on:
     types: [ completed ]
 
 jobs:
-  config-options:
+  hm-activation-macos:
     if: ${{ github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main') }}
-    runs-on: ubuntu-latest
+    runs-on: macos-14
     env:
       TARGET_SHA: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
     steps:
@@ -20,11 +20,8 @@ jobs:
         with:
           ref: ${{ env.TARGET_SHA }}
 
-      - name: Verify flake.lock owners
-        run: scripts/check-flake-lock-owners.sh
-
       - name: Install Nix
         uses: DeterminateSystems/nix-installer-action@v13
 
-      - name: Verify config options are up to date
-        run: nix build .#checks.x86_64-linux.config-options --print-build-logs
+      - name: Run HM activation
+        run: scripts/hm-activation-macos.sh

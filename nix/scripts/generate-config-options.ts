@@ -10,19 +10,19 @@ const argValue = (flag: string): string | null => {
 };
 
 const repo = argValue("--repo") ?? process.cwd();
-const outPath = argValue("--out") ?? path.join(process.cwd(), "nix/generated/moltbot-config-options.nix");
+const outPath = argValue("--out") ?? path.join(process.cwd(), "nix/generated/openclaw-config-options.nix");
 
 const schemaPath = path.join(repo, "src/config/zod-schema.ts");
 const schemaUrl = pathToFileURL(schemaPath).href;
 
 const loadSchema = async (): Promise<Record<string, unknown>> => {
   const mod = await import(schemaUrl);
-  const MoltbotSchema = mod.MoltbotSchema;
-  if (!MoltbotSchema || typeof MoltbotSchema.toJSONSchema !== "function") {
-    console.error(`MoltbotSchema not found at ${schemaPath}`);
+  const schema = mod.OpenClawSchema ?? mod.MoltbotSchema;
+  if (!schema || typeof schema.toJSONSchema !== "function") {
+    console.error(`OpenClawSchema/MoltbotSchema not found at ${schemaPath}`);
     process.exit(1);
   }
-  return MoltbotSchema.toJSONSchema({
+  return schema.toJSONSchema({
     target: "draft-07",
     unrepresentable: "any",
   }) as Record<string, unknown>;
@@ -150,13 +150,13 @@ const baseTypeForSchema = (schemaObj: JsonSchema, indent: string): string => {
 
   if (schema.anyOf && Array.isArray(schema.anyOf) && schema.anyOf.length > 0) {
     const entries = schema.anyOf as JsonSchema[];
-    const parts = entries.map((entry) => typeForSchema(entry, indent)).join(" ");
+    const parts = entries.map((entry) => `(${typeForSchema(entry, indent)})`).join(" ");
     return `t.oneOf [ ${parts} ]`;
   }
 
   if (schema.oneOf && Array.isArray(schema.oneOf) && schema.oneOf.length > 0) {
     const entries = schema.oneOf as JsonSchema[];
-    const parts = entries.map((entry) => typeForSchema(entry, indent)).join(" ");
+    const parts = entries.map((entry) => `(${typeForSchema(entry, indent)})`).join(" ");
     return `t.oneOf [ ${parts} ]`;
   }
 
@@ -166,7 +166,9 @@ const baseTypeForSchema = (schemaObj: JsonSchema, indent: string): string => {
 
   const schemaType = schema.type;
   if (Array.isArray(schemaType) && schemaType.length > 0) {
-    const parts = schemaType.map((entry) => typeForSchema({ type: entry }, indent)).join(" ");
+    const parts = schemaType
+      .map((entry) => `(${typeForSchema({ type: entry }, indent)})`)
+      .join(" ");
     return `t.oneOf [ ${parts} ]`;
   }
 
@@ -220,14 +222,23 @@ const objectTypeForSchema = (schema: JsonSchema, indent: string): string => {
   return `t.submodule { options = {\n${inner}\n${indent}}; }`;
 };
 
-const renderOption = (key: string, schemaObj: JsonSchema, _required: boolean, indent: string): string => {
+const renderOption = (key: string, schemaObj: JsonSchema, required: boolean, indent: string): string => {
   const schema = deref(schemaObj, new Set());
   const description = typeof schema.description === "string" ? schema.description : null;
-  const typeExpr = typeForSchema(schema, indent);
+  const hasSchemaDefault = schema.default !== undefined;
+  const effectiveRequired = required && !hasSchemaDefault;
+  const baseTypeExpr = typeForSchema(schema, indent);
+  const typeExpr =
+    !effectiveRequired && !baseTypeExpr.startsWith("t.nullOr")
+      ? `t.nullOr (${baseTypeExpr})`
+      : baseTypeExpr;
   const lines = [
     `${indent}${nixAttr(key)} = lib.mkOption {`,
     `${indent}  type = ${typeExpr};`,
   ];
+  if (!effectiveRequired) {
+    lines.push(`${indent}  default = null;`);
+  }
   if (description) {
     lines.push(`${indent}  description = ${stringify(description)};`);
   }
@@ -244,7 +255,7 @@ const renderOption = (key: string, schemaObj: JsonSchema, _required: boolean, in
     .map((key) => renderOption(key, rootProps[key], requiredRoot.has(key), "  "))
     .join("\n\n");
 
-  const output = `# Generated from upstream Moltbot schema. DO NOT EDIT.\n{ lib }:\nlet\n  t = lib.types;\nin\n{\n${body}\n}\n`;
+  const output = `# Generated from upstream OpenClaw schema. DO NOT EDIT.\n{ lib }:\nlet\n  t = lib.types;\nin\n{\n${body}\n}\n`;
 
   fs.mkdirSync(path.dirname(outPath), { recursive: true });
   fs.writeFileSync(outPath, output, "utf8");

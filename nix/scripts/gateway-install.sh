@@ -86,21 +86,26 @@ matrix_ext="$out/lib/openclaw/extensions/matrix"
 if [ -d "$matrix_ext" ]; then
   mkdir -p "$matrix_ext/node_modules/@vector-im" "$matrix_ext/node_modules/@matrix-org"
   
-  # Link matrix-bot-sdk
-  matrix_bot_sdk_src="$(find "$out/lib/openclaw/node_modules/.pnpm" -path "*/@vector-im/matrix-bot-sdk@*/node_modules/@vector-im/matrix-bot-sdk" -print | head -n 1)"
+  # Link matrix-bot-sdk (pnpm uses + instead of / in folder names)
+  matrix_bot_sdk_src="$(find "$out/lib/openclaw/node_modules/.pnpm" -type d -name "matrix-bot-sdk" | grep "@vector-im" | head -n 1)"
   if [ -n "$matrix_bot_sdk_src" ]; then
+    echo "Linking matrix-bot-sdk from: $matrix_bot_sdk_src"
     ln -sfn "$matrix_bot_sdk_src" "$matrix_ext/node_modules/@vector-im/matrix-bot-sdk"
-    # Also link to top-level for require resolution
     mkdir -p "$out/lib/openclaw/node_modules/@vector-im"
     ln -sfn "$matrix_bot_sdk_src" "$out/lib/openclaw/node_modules/@vector-im/matrix-bot-sdk"
+  else
+    echo "WARNING: matrix-bot-sdk not found in node_modules/.pnpm"
   fi
   
   # Link matrix-sdk-crypto-nodejs
-  matrix_crypto_src="$(find "$out/lib/openclaw/node_modules/.pnpm" -path "*/@matrix-org/matrix-sdk-crypto-nodejs@*/node_modules/@matrix-org/matrix-sdk-crypto-nodejs" -print | head -n 1)"
+  matrix_crypto_src="$(find "$out/lib/openclaw/node_modules/.pnpm" -type d -name "matrix-sdk-crypto-nodejs" | grep "@matrix-org" | head -n 1)"
   if [ -n "$matrix_crypto_src" ]; then
+    echo "Linking matrix-sdk-crypto-nodejs from: $matrix_crypto_src"
     ln -sfn "$matrix_crypto_src" "$matrix_ext/node_modules/@matrix-org/matrix-sdk-crypto-nodejs"
     mkdir -p "$out/lib/openclaw/node_modules/@matrix-org"
     ln -sfn "$matrix_crypto_src" "$out/lib/openclaw/node_modules/@matrix-org/matrix-sdk-crypto-nodejs"
+  else
+    echo "WARNING: matrix-sdk-crypto-nodejs not found in node_modules/.pnpm"
   fi
 fi
 # === END MATRIX EXTENSION SUPPORT ===

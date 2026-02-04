@@ -8936,6 +8936,10 @@ in
           type = t.nullOr (t.int);
           default = null;
         };
+        maxCharsCap = lib.mkOption {
+          type = t.nullOr (t.int);
+          default = null;
+        };
         maxRedirects = lib.mkOption {
           type = t.nullOr (t.int);
           default = null;

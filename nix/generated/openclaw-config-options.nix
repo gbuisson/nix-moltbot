@@ -5338,6 +5338,10 @@ in
             type = t.nullOr (t.bool);
             default = null;
           };
+          groupPolicy = lib.mkOption {
+            type = t.nullOr (t.enum [ "open" "disabled" "allowlist" ]);
+            default = null;
+          };
           requireMention = lib.mkOption {
             type = t.nullOr (t.bool);
             default = null;
@@ -5392,6 +5396,10 @@ in
             };
             enabled = lib.mkOption {
               type = t.nullOr (t.bool);
+              default = null;
+            };
+            groupPolicy = lib.mkOption {
+              type = t.nullOr (t.enum [ "open" "disabled" "allowlist" ]);
               default = null;
             };
             requireMention = lib.mkOption {
@@ -5682,6 +5690,10 @@ in
           type = t.nullOr (t.bool);
           default = null;
         };
+        groupPolicy = lib.mkOption {
+          type = t.nullOr (t.enum [ "open" "disabled" "allowlist" ]);
+          default = null;
+        };
         requireMention = lib.mkOption {
           type = t.nullOr (t.bool);
           default = null;
@@ -5736,6 +5748,10 @@ in
           };
           enabled = lib.mkOption {
             type = t.nullOr (t.bool);
+            default = null;
+          };
+          groupPolicy = lib.mkOption {
+            type = t.nullOr (t.enum [ "open" "disabled" "allowlist" ]);
             default = null;
           };
           requireMention = lib.mkOption {

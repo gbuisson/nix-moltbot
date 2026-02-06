@@ -608,6 +608,10 @@ in
           type = t.nullOr (t.attrsOf (t.anything));
           default = null;
         };
+        streaming = lib.mkOption {
+          type = t.nullOr (t.bool);
+          default = null;
+        };
       }; }));
         default = null;
       };

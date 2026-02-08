@@ -7213,6 +7213,10 @@ in
       };
       update = lib.mkOption {
         type = t.nullOr (t.submodule { options = {
+        commandTimeoutMs = lib.mkOption {
+          type = t.nullOr (t.int);
+          default = null;
+        };
         debounceMs = lib.mkOption {
           type = t.nullOr (t.int);
           default = null;
@@ -7221,11 +7225,23 @@ in
           type = t.nullOr (t.str);
           default = null;
         };
+        embedTimeoutMs = lib.mkOption {
+          type = t.nullOr (t.int);
+          default = null;
+        };
         interval = lib.mkOption {
           type = t.nullOr (t.str);
           default = null;
         };
         onBoot = lib.mkOption {
+          type = t.nullOr (t.bool);
+          default = null;
+        };
+        updateTimeoutMs = lib.mkOption {
+          type = t.nullOr (t.int);
+          default = null;
+        };
+        waitForBootSync = lib.mkOption {
           type = t.nullOr (t.bool);
           default = null;
         };

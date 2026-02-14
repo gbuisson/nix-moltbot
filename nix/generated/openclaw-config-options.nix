@@ -4,6 +4,11 @@ let
   t = lib.types;
 in
 {
+  "$schema" = lib.mkOption {
+    type = t.nullOr (t.str);
+    default = null;
+  };
+
   agents = lib.mkOption {
     type = t.nullOr (t.submodule { options = {
     defaults = lib.mkOption {

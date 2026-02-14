@@ -7093,15 +7093,52 @@ in
         default = null;
       };
       mode = lib.mkOption {
-        type = t.nullOr (t.oneOf [ (t.enum [ "token" ]) (t.enum [ "password" ]) ]);
+        type = t.nullOr (t.oneOf [ (t.enum [ "token" ]) (t.enum [ "password" ]) (t.enum [ "trusted-proxy" ]) ]);
         default = null;
       };
       password = lib.mkOption {
         type = t.nullOr (t.str);
         default = null;
       };
+      rateLimit = lib.mkOption {
+        type = t.nullOr (t.submodule { options = {
+        exemptLoopback = lib.mkOption {
+          type = t.nullOr (t.bool);
+          default = null;
+        };
+        lockoutMs = lib.mkOption {
+          type = t.nullOr (t.number);
+          default = null;
+        };
+        maxAttempts = lib.mkOption {
+          type = t.nullOr (t.number);
+          default = null;
+        };
+        windowMs = lib.mkOption {
+          type = t.nullOr (t.number);
+          default = null;
+        };
+      }; });
+        default = null;
+      };
       token = lib.mkOption {
         type = t.nullOr (t.str);
+        default = null;
+      };
+      trustedProxy = lib.mkOption {
+        type = t.nullOr (t.submodule { options = {
+        allowUsers = lib.mkOption {
+          type = t.nullOr (t.listOf (t.str));
+          default = null;
+        };
+        requiredHeaders = lib.mkOption {
+          type = t.nullOr (t.listOf (t.str));
+          default = null;
+        };
+        userHeader = lib.mkOption {
+          type = t.str;
+        };
+      }; });
         default = null;
       };
     }; });

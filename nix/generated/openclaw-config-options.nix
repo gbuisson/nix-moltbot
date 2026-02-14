@@ -8254,7 +8254,7 @@ in
     providers = lib.mkOption {
       type = t.nullOr (t.attrsOf (t.submodule { options = {
       api = lib.mkOption {
-        type = t.nullOr (t.oneOf [ (t.enum [ "openai-completions" ]) (t.enum [ "openai-responses" ]) (t.enum [ "anthropic-messages" ]) (t.enum [ "google-generative-ai" ]) (t.enum [ "github-copilot" ]) (t.enum [ "bedrock-converse-stream" ]) ]);
+        type = t.nullOr (t.oneOf [ (t.enum [ "openai-completions" ]) (t.enum [ "openai-responses" ]) (t.enum [ "anthropic-messages" ]) (t.enum [ "google-generative-ai" ]) (t.enum [ "github-copilot" ]) (t.enum [ "bedrock-converse-stream" ]) (t.enum [ "ollama" ]) ]);
         default = null;
       };
       apiKey = lib.mkOption {
@@ -8279,13 +8279,29 @@ in
       models = lib.mkOption {
         type = t.listOf (t.submodule { options = {
         api = lib.mkOption {
-          type = t.nullOr (t.oneOf [ (t.enum [ "openai-completions" ]) (t.enum [ "openai-responses" ]) (t.enum [ "anthropic-messages" ]) (t.enum [ "google-generative-ai" ]) (t.enum [ "github-copilot" ]) (t.enum [ "bedrock-converse-stream" ]) ]);
+          type = t.nullOr (t.oneOf [ (t.enum [ "openai-completions" ]) (t.enum [ "openai-responses" ]) (t.enum [ "anthropic-messages" ]) (t.enum [ "google-generative-ai" ]) (t.enum [ "github-copilot" ]) (t.enum [ "bedrock-converse-stream" ]) (t.enum [ "ollama" ]) ]);
           default = null;
         };
         compat = lib.mkOption {
           type = t.nullOr (t.submodule { options = {
           maxTokensField = lib.mkOption {
             type = t.nullOr (t.oneOf [ (t.enum [ "max_completion_tokens" ]) (t.enum [ "max_tokens" ]) ]);
+            default = null;
+          };
+          requiresAssistantAfterToolResult = lib.mkOption {
+            type = t.nullOr (t.bool);
+            default = null;
+          };
+          requiresMistralToolIds = lib.mkOption {
+            type = t.nullOr (t.bool);
+            default = null;
+          };
+          requiresThinkingAsText = lib.mkOption {
+            type = t.nullOr (t.bool);
+            default = null;
+          };
+          requiresToolResultName = lib.mkOption {
+            type = t.nullOr (t.bool);
             default = null;
           };
           supportsDeveloperRole = lib.mkOption {
@@ -8298,6 +8314,18 @@ in
           };
           supportsStore = lib.mkOption {
             type = t.nullOr (t.bool);
+            default = null;
+          };
+          supportsStrictMode = lib.mkOption {
+            type = t.nullOr (t.bool);
+            default = null;
+          };
+          supportsUsageInStreaming = lib.mkOption {
+            type = t.nullOr (t.bool);
+            default = null;
+          };
+          thinkingFormat = lib.mkOption {
+            type = t.nullOr (t.oneOf [ (t.enum [ "openai" ]) (t.enum [ "zai" ]) (t.enum [ "qwen" ]) ]);
             default = null;
           };
         }; });
